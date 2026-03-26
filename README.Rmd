@@ -1,0 +1,5 @@
+---
+title: Helen Chen's Data550 Final Project Outline
+author: Hua Xuan (Helen) Chen
+output: github_document
+---
