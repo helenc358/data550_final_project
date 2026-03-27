@@ -1,5 +1,5 @@
 ---
-title: "Report"
+title: "Final Report"
 author: Helen Chen
 output: html_document
 date: Sys.date()
