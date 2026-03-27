@@ -47,3 +47,11 @@ coeffs_for_model <- readRDS(
 coeffs_for_model
 ```
 
+# Sample model with random intercept for units sold:
+
+```{r, model1}
+model1 <- readRDS(file = here::here("output/model1_summ.rds"))
+
+model1
+```
+
