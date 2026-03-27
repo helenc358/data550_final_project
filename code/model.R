@@ -28,7 +28,23 @@ shoe_Y_test <- shoe_Y[-train_index]
 fit_model <- cv.glmnet(shoe_X_train, shoe_Y_train, nfolds = 5)
 model_coeffs <- as.matrix(coef(fit_model, s = 'lambda.min'))
 
+# Modeling:
+library(lmerTest)
+mod <- lmer(revenue_usd ~ (1 | units_sold), data = final_data)
+performance::icc(mod) # since ICC was quite large, we should consider doing a model with a random intercept for units_sold
+
+model <- lmer(revenue_usd ~ brand + category + gender + size + color + discount_percent +
+                sales_channel + country + payment_method + customer_income_level + customer_rating + year + (1|units_sold), data = final_data)
+
+library(gtsummary)
+model1_summ <- tbl_regression(model)
+
 saveRDS(
   model_coeffs,
   file = here::here("output/model_coeffs.rds")
+)
+
+saveRDS(
+  model1_summ,
+  file = here::here("output/model1_summ.rds")
 )
