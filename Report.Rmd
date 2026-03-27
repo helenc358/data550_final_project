@@ -1,0 +1,49 @@
+---
+title: "Report"
+author: Helen Chen
+output: html_document
+date: Sys.date()
+---
+
+```{r, here-i-am, include = FALSE}
+here::i_am(
+  "Report.Rmd"
+)
+```
+
+```{r, load-data, include = FALSE}
+shoe_data <- read.csv(
+  file = here::here("data/global_sports_footwear_sales_2018_2026.csv")
+)
+```
+
+# Tabular Analysis:
+
+```{r, table-1}
+table_1 <- readRDS(
+  file = here::here("output/table_1.rds"))
+  
+table_1
+```
+
+# Plots:
+
+```{r, boxplots}
+knitr::include_graphics(
+  here::here("output/boxplot1.png")
+)
+
+knitr::include_graphics(
+  here::here("output/boxplot2.png")
+)
+```
+
+# LASSO applied for linear regression for feature selection:
+
+```{r, feature-selection-lasso}
+coeffs_for_model <- readRDS(
+  file = here::here("output/model_coeffs.rds"))
+  
+coeffs_for_model
+```
+
