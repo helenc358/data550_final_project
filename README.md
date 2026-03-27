@@ -44,7 +44,8 @@ from a linear mixed effects model.
 
 - This is still a work in progress, but it currently uses LASSO for
   feature selection in linear regression to find the most important
-  predictors of revenue
+  predictors of revenue, as there are numerous predictors in this
+  dataset
 
 - Saves the matrix of coefficients from LASSO output as a `.rds` object
   in `output/` folder
