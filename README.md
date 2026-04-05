@@ -25,6 +25,19 @@ and 2 boxplots, coefficients from LASSO for feature selection in linear
 regression to find the most important predictors of revenue, and results
 from a linear mixed effects model.
 
+After you fork and clone this repo to your computer, navigate to that
+directory in your terminal using the cd command. To ensure you have the
+necessary packages and versions of those packages installed to run my
+code, please do the following: 1. Navigate to your console, and set the
+working directory to the project directory using setwd() 2. Next, type
+in and enter source(“renv/activate.R”), which is able to check that
+renv’s installed 3. To install the packages in the renv lockfile, type
+in renv::restore() in the console. Type in y and press enter to proceed.
+
+Alternatively, you may enter “make install” in the terminal, which
+ensures that your library is synchronized with the renv lockfile. The
+make rule restores the package library.
+
 ## Code description:
 
 `code/make_table.R`
