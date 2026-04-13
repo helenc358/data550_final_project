@@ -3,6 +3,7 @@ here::i_am("code/model.R")
 
 library(glmnet)
 library(dplyr)
+library(broom)
 
 shoe_data <- read.csv(
   file = here::here("data/global_sports_footwear_sales_2018_2026.csv")
@@ -33,10 +34,18 @@ library(lmerTest)
 mod <- lmer(revenue_usd ~ (1 | units_sold), data = final_data)
 performance::icc(mod) # since ICC was quite large, we should consider doing a model with a random intercept for units_sold
 
+final_data$category <- factor(final_data$category, levels = c("Lifestyle", "Basketball", "Gym", "Running", "Training"))
+final_data$sales_channel <- factor(final_data$sales_channel, levels = c("Retail Store", "Online"))
+final_data$country <- factor(final_data$country, levels = c("USA", "Germany", "India", "Pakistan", "UAE", "UK"))
+final_data$payment_method <- factor(final_data$payment_method, levels = c("Cash", "Card", "Wallet", "Bank Transfer"))
+final_data$customer_income_level <- factor(final_data$customer_income_level, levels = c("Low", "Medium", "High"))
+
 model <- lmer(revenue_usd ~ brand + category + gender + size + color + discount_percent +
                 sales_channel + country + payment_method + customer_income_level + customer_rating + year + (1|units_sold), data = final_data)
 
 library(gtsummary)
+library(broom.helpers)
+library(broom.mixed)
 model1_summ <- tbl_regression(model)
 
 saveRDS(
