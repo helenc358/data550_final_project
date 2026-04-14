@@ -1,5 +1,5 @@
 ---
-title: "Final Report"
+title: "DATA 550 Final Report"
 author: Helen Chen
 output: html_document
 date: "`r Sys.Date()`"
@@ -17,6 +17,13 @@ shoe_data <- read.csv(
 )
 ```
 
+The dataset I used for my final project is from Kaggle
+(https://www.kaggle.com/datasets/aliiihussain/sports-footwear-sales-and-consumer-behavior?resource=download), and it contains consumer and sales data on shoe purchases from 2018 to 2026. The author of the dataset is Ali Hussain. The dataset contains 30,000 rows and 18 columns, and the columns include the shoe brand (i.e. Nike, Adidas, Reebok, etc.), gender of the consumer, color of the shoe, country where the sale occurred, the discount applied on the sale (in %), and more. 
+
+A question I explored using this dataset was: what are the main variables that are associated with revenue (in USD)? I was interested in this as it relates to revenue forecasting in the shoe industry.
+
+First, I did some EDA and presented a table and two boxplots to show different associations. Then, I ran a linear regression model with LASSO for feature selection. Further, I looked into whether random effects would be important to include in this model by examining the Intraclass Correlation Coefficient. Then, I ran a linear regression model with a random intercept for units sold and all the other predictors as fixed effects. I presented the results of my final model in a well-formatted table.
+
 # Tabular Analysis:
 
 ```{r, table-1}
@@ -26,19 +33,29 @@ table_1 <- readRDS(
 table_1
 ```
 
+The table above shows the total shoe units sold and total revenue (in USD) by country, in increasing order of total revenue. We can see that Pakistan has the fewest units sold and the lowest total revenue, and UAE has the greatest number of units sold and the highest total revenue. From the table, we can also see that there's a positive association between total revenue and units sold, where as units sold increases, the total revenue also increases. This is understandable, as revenue is equal to quantity * price. This also suggests that the shoe prices in each of the countries are generally similar. If the prices were very different, for example, if in UAE they had much more expensive shoes, then the units sold may not be large but the revenue could still be high.
+
 # Plots:
 
-```{r, boxplots}
+```{r, boxplot1}
 knitr::include_graphics(
   here::here("output/boxplot1.png")
 )
+```
 
+The boxplot above shows the distribution of revenue for each of the shoe brands in the dataset, in increasing order of median revenue. We can see that the median revenues are generally similar for all the shoe brands. New Balance has the highest median revenue, and Reebok has the lowest.
+
+```{r, boxplot2}
 knitr::include_graphics(
   here::here("output/boxplot2.png")
 )
 ```
 
-# LASSO applied for linear regression for feature selection:
+The boxplot above shows the distribution of revenue for each of the shoe categories, in increasing order of median revenue. We can see that the median revenues are generally quite similar for all the shoe categories in the dataset. The training and lifestyle categories have the highest median revenues, and the basketball category has the lowest. This is understandable, as training and lifestyle are more generic and could apply to a larger group of people, whereas basketball shoes are more specific and may not be applicable/useful for most people.
+
+# LASSO applied to linear regression for feature selection:
+
+I applied LASSO to a linear regression model for feature selection. The response variable was revenue (in USD), and the predictors were: brand, category, gender of consumer, size, color, discount percentage, sales channel, country, payment method, customer income level, customer rating, units sold, and year. I used a 70%/30% training/testing set split, 5-fold cross validation, and I set seed at '123' for reproducibility. Using cross validation, I chose the lambda that minimized the CV error, and I looked at the coefficient estimates under that lambda value. The results are presented below:
 
 ```{r, feature-selection-lasso}
 coeffs_for_model <- readRDS(
@@ -47,11 +64,19 @@ coeffs_for_model <- readRDS(
 coeffs_for_model
 ```
 
-# Sample model with random intercept for units sold:
+The predictors with non-zero coefficients were: if the brand of the shoe was Reebok (compared to Adidas), if the category of the shoe was basketball (compared to lifestyle), discount percentage, and units sold. For future study, it could be helpful to use group LASSO for all the categorical variables, so it wouldn’t separate the categorical levels of these variables, which would be helpful for interpretability.
+
+# Linear regression model with random intercept for units sold:
+
+From the LASSO model above, units sold was a predictor with a very large coefficient, so I looked into it more. I wanted to see if I should consider adding random effects to the model, so I ran an intercept-only model with a random intercept for units sold. The Intraclass Correlation Coefficient (ICC) was 0.644, meaning around 64.4% of the variation in revenue (in USD) can be explained by the clustering of units sold. The ICC value was quite high, suggesting that a model with a random effect for units sold could be important to include in the model. I ran a linear regression model with revenue as the response, a random intercept for units sold, and the following fixed effects: brand, category, gender of consumer, size, color, discount percentage, sales channel, country, payment method, customer income level, customer rating, and year. The results are presented in the table below:
 
 ```{r, model1}
-model1 <- readRDS(file = here::here("output/model1_summ.rds"))
+model1 <- readRDS(
+  file = here::here("output/model1_summ.rds"))
 
 model1
 ```
 
+The variables that were statistically significant on the alpha = 0.05 level were the category of shoe being basketball (compared to lifestyle) and the discount percentage on the shoe (p = 0.030 and p < 0.001, respectively). As discount percentage increases, we expect the revenue to decrease. This is understandable, as revenue = price * quantity sold, and as price decreases, revenue generally also decreases. It also suggests that even with discounts, there isn't a larger quantity of shoes sold to offset the revenue decrease with lower prices.
+
+Also, basketball shoes are associated with lower revenue compared to lifestyle shoes. This aligns with what we saw with the second boxplot. Since 'lifestyle' is a more generic category and can be applicable to a larger group of people, it could be associated with greater sales, whereas basketball shoes are specific and may not be useful for most people.
