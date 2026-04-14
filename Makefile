@@ -18,7 +18,7 @@ descriptive_analysis:	output/table_1.rds output/boxplot1.png output/boxplot2.png
 
 .PHONY: clean
 clean:
-	rm -f output/*.rds && output/*.png && rm -f report.html
+	rm -f output/*.rds && rm -f output/*.png && rm -f report.html
 
 .PHONY: install
 install:
