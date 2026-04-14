@@ -67,6 +67,10 @@ stopCluster(cluster_for_parallel_comp)
 # Get coefficients
 model_coeffs <- as.matrix(coef(cv_fit$gglasso.fit, s = cv_fit$lambda.min))
 
+# Test set CV RMSE
+test_y <- predict(cv_fit, as.matrix(shoe_X_test), type = "link", s = "lambda.min")
+sqrt(mean((as.matrix(test_y) - as.matrix(shoe_Y_test)) ^ 2))
+
 # Re-run linear regression with the variables that had non-zero coefficients
 # Renamed cols for clarity in the final table
 final_data <- final_data %>%
