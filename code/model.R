@@ -1,9 +1,12 @@
-
 here::i_am("code/model.R")
 
-library(glmnet)
+library(gglasso)
 library(dplyr)
 library(broom)
+library(doParallel)
+library(gtsummary)
+library(broom.helpers)
+library(broom.mixed)
 
 shoe_data <- read.csv(
   file = here::here("data/global_sports_footwear_sales_2018_2026.csv")
@@ -12,9 +15,11 @@ shoe_data <- read.csv(
 shoe_data$year <- as.integer(substr(shoe_data$order_date, 1, 4)) # create year variable
 shoe_data_reorder <- shoe_data %>% relocate(revenue_usd)
 
-shoe_Y <- shoe_data_reorder$revenue_usd
-final_data <- shoe_data_reorder %>% select(revenue_usd, brand, category, gender, size, color, discount_percent, sales_channel, units_sold,
-                                           payment_method, sales_channel, country, customer_income_level, customer_rating, year)
+# Look only at data from 2022-2026
+final_data <- shoe_data_reorder  %>%
+  filter(year >= 2022) %>%
+  select(revenue_usd, brand, category, gender, size, color, discount_percent, sales_channel, units_sold,
+         payment_method, country, customer_income_level, customer_rating)
 
 # Relevel variables
 final_data$category <- factor(final_data$category, levels = c("Lifestyle", "Basketball", "Gym", "Running", "Training"))
@@ -23,48 +28,60 @@ final_data$country <- factor(final_data$country, levels = c("USA", "Germany", "I
 final_data$payment_method <- factor(final_data$payment_method, levels = c("Cash", "Card", "Wallet", "Bank Transfer"))
 final_data$customer_income_level <- factor(final_data$customer_income_level, levels = c("Low", "Medium", "High"))
 
-shoe_X <- model.matrix(revenue_usd ~ ., data = final_data)[, -1]
+# For group lasso
+num_brands <- length(unique(final_data$brand))
+num_categories <- length(unique(final_data$category))
+num_gender <- length(unique(final_data$gender))
+num_color <- length(unique(final_data$color))
+num_sales_channel <- length(unique(final_data$sales_channel))
+num_payment_method <- length(unique(final_data$payment_method))
+num_country <- length(unique(final_data$country))
+num_customer_income_level <- length(unique(final_data$customer_income_level))
+
+group_indices <- c(rep(1, num_brands-1), rep(2, num_categories-1), rep(3, num_gender-1), 4, rep(5, num_color-1), 6,
+                   rep(7, num_sales_channel-1), 8, rep(9, num_payment_method-1), rep(10, num_country-1), rep(11, num_customer_income_level-1), 12)
 
 set.seed(123)
+
+shoe_Y <- final_data$revenue_usd
+shoe_X <- model.matrix(revenue_usd ~ ., data = final_data)[, -1]
 train_index <- sample(1:nrow(final_data), 0.7 * nrow(final_data))
 
 shoe_X_train <- shoe_X[train_index, ]
 shoe_Y_train <- shoe_Y[train_index]
+
 shoe_X_test <- shoe_X[-train_index, ]
 shoe_Y_test <- shoe_Y[-train_index]
 
-# Coefficients chosen
-fit_model <- cv.glmnet(shoe_X_train, shoe_Y_train, nfolds = 5)
-model_coeffs <- as.matrix(coef(fit_model, s = 'lambda.min'))
+num_cores <- detectCores() - 1
+cluster_for_parallel_comp <- makeCluster(num_cores)
+registerDoParallel(cluster_for_parallel_comp)
 
-# Modeling:
-library(lmerTest)
-mod <- lmer(revenue_usd ~ (1 | units_sold), data = final_data)
-ICC <- performance::icc(mod) # since ICC was quite large, we should consider doing a model with a random intercept for units_sold
+# Group lasso with 5-fold CV 
+set.seed(123)
+cv_fit <- cv.gglasso(shoe_X_train, shoe_Y_train, group_indices, loss = "ls", nfolds = 5)
 
+stopCluster(cluster_for_parallel_comp)
+# Source: https://www.r-bloggers.com/2024/01/r-doparallel-a-brain-friendly-introduction-to-parallelism-in-r/
+
+# Get coefficients
+model_coeffs <- as.matrix(coef(cv_fit$gglasso.fit, s = cv_fit$lambda.min))
+
+# Re-run linear regression with the variables that had non-zero coefficients
 # Renamed cols for clarity in the final table
 final_data <- final_data %>%
   rename(Brand = brand,
-         Category = category,
          Gender = gender,
-         Size = size,
          Color = color,
          `Discount Percent` = discount_percent,
-         `Sales Channel` = sales_channel,
-         `Country of Sale` = country,
+         `Units Sold` = units_sold,
          `Payment Method` = payment_method,
          `Customer Income Level` = customer_income_level,
-         `Customer Rating` = customer_rating,
-         `Year from 2018` = year)
+         `Customer Rating` = customer_rating)
 
-model <- lmer(revenue_usd ~ Brand + Category + Gender + Size + Color + `Discount Percent` +
-                `Sales Channel` + `Country of Sale` + `Payment Method` + `Customer Income Level` + `Customer Rating` + `Year from 2018` + (1|units_sold), data = final_data)
+model <- lm(revenue_usd ~ Brand + Gender + Color + `Discount Percent` + `Units Sold` + `Payment Method` + `Customer Income Level` + `Customer Rating`, data = final_data)
 
-library(gtsummary)
-library(broom.helpers)
-library(broom.mixed)
-
-# make well-formatted table
+# Make well-formatted table
 model1_summ <- tbl_regression(model)
 
 saveRDS(
