@@ -55,7 +55,7 @@ The boxplot above shows the distribution of revenue for each of the shoe categor
 
 # Group LASSO applied to linear regression model for feature selection:
 
-I applied group LASSO to a linear regression model for feature selection. The response variable was revenue (in USD), and the predictors were: shoe brand, shoe category, gender, shoe size, shoe color, discount percentage, sales channel, units sold, payment method, country of sale, customer income level, and customer rating. I used a 70%/30% training/testing set split, 5-fold cross validation, and I set seed at '123' for reproducibility. Using cross validation, I chose the lambda that minimized the CV error, and I looked at the coefficient estimates under that lambda value. The results are presented below:
+I applied group LASSO to a linear regression model for feature selection. The response variable was revenue (in USD), and the predictors were: shoe brand, shoe category, gender, shoe size, shoe color, discount percentage, sales channel, units sold, payment method, country of sale, customer income level, and customer rating. I used a 70%/30% training/testing set split, 5-fold cross validation, and I set seed at '123' for reproducibility. I focused on the years 2022-2026 here, as it's computationally intensive to run group LASSO on the entire dataset, which is very large. Using cross validation, I chose the lambda that minimized the CV error, and I looked at the coefficient estimates under that lambda value. The results are presented below:
 
 ```{r, feature-selection-lasso}
 coeffs_for_model <- readRDS(

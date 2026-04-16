@@ -16,7 +16,7 @@ shoe_data$year <- as.integer(substr(shoe_data$order_date, 1, 4)) # create year v
 shoe_data_reorder <- shoe_data %>% relocate(revenue_usd)
 
 # Look only at data from 2022-2026
-final_data <- shoe_data_reorder  %>%
+final_data <- shoe_data_reorder %>%
   filter(year >= 2022) %>%
   select(revenue_usd, brand, category, gender, size, color, discount_percent, sales_channel, units_sold,
          payment_method, country, customer_income_level, customer_rating)
@@ -45,7 +45,7 @@ set.seed(123)
 
 shoe_Y <- final_data$revenue_usd
 shoe_X <- model.matrix(revenue_usd ~ ., data = final_data)[, -1]
-train_index <- sample(1:nrow(final_data), 0.7 * nrow(final_data))
+train_index <- sample(1:nrow(final_data), 0.7 * nrow(final_data)) # 70%/30% training/testing split
 
 shoe_X_train <- shoe_X[train_index, ]
 shoe_Y_train <- shoe_Y[train_index]
@@ -53,6 +53,7 @@ shoe_Y_train <- shoe_Y[train_index]
 shoe_X_test <- shoe_X[-train_index, ]
 shoe_Y_test <- shoe_Y[-train_index]
 
+# Parallelism so code runs faster
 num_cores <- detectCores() - 1
 cluster_for_parallel_comp <- makeCluster(num_cores)
 registerDoParallel(cluster_for_parallel_comp)
