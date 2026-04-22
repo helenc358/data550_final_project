@@ -1,4 +1,4 @@
-Helen Chen’s Data550 Final Project Outline
+Helen Chen’s DATA550 Final Project Outline
 ================
 Hua Xuan (Helen) Chen
 
@@ -20,27 +20,59 @@ Report.Rmd, a .gitignore file, a Makefile, a Dockerfile, and the README.
 The renv folder and renv.lock are to ensure that you can run the code
 with the same packages and with the same versions of those packages.
 
-You may enter “make final_report/report.html” in the terminal, which
-will generate the final report in html format, and it will be in the
-“final_report” folder. The contents of the report are: EDA table and 2
-boxplots, coefficients from group LASSO for feature selection in linear
-regression to find the most important predictors of revenue, and results
-from the final linear regression model in a table.
+To create the report: you may enter “make” in the terminal, which will
+generate the final report in html format. The contents of the report
+are: EDA table and 2 boxplots, coefficients from group LASSO for feature
+selection in linear regression to find the most important predictors of
+revenue, and results from the final linear regression model in a table.
 
-After you fork and clone this repo to your computer, navigate to that
-directory in your terminal using the cd command. To ensure you have the
-necessary packages and versions of those packages installed to run my
-code, please do the following: 1. Navigate to your console, and set the
-working directory to the project directory using setwd() 2. Next, type
-in and enter source(“renv/activate.R”), which is able to check that
-renv’s installed 3. To install the packages in the renv lockfile, type
-in renv::restore() in the console. Type in y and press enter to proceed.
+To ensure you have the correct packages and versions of them: after you
+fork and clone this repo to your computer, navigate to that directory in
+your terminal using the cd command. To ensure you have the necessary
+packages and versions of those packages installed to run my code, please
+do the following: 1. Navigate to your console, and set the working
+directory to the project directory using setwd() 2. Next, type in and
+enter source(“renv/activate.R”), which is able to check that renv’s
+installed 3. To install the packages in the renv lockfile, type in
+renv::restore() in the console. Type in y and press enter to proceed.
 
 Alternatively, you may enter “make install” in the terminal, which
 ensures that your library is synchronized with the renv lockfile. The
 make rule restores the package library.
 
-## Code description:
+## Docker Instructions:
+
+Instructions for building the image: to build the image, first make sure
+your working directory is your project root directory (can check with
+pwd, and if incorrect, change with cd in the terminal). Then, enter in
+the terminal: “docker build -t <image_name> .” You can replace
+<image_name> with a name you prefer for the image. If you’d like to run
+the image that you just built in the terminal, please do the following:
+
+- For Mac users: docker run -v
+  “\$(pwd)”/report:/home/rstudio/project/report <image_name>
+
+- For Windows users: docker run -v
+  “/\$(pwd)”/report:/home/rstudio/project/report <image_name>
+
+The link to my DockerHub image is:
+<https://hub.docker.com/repository/docker/helenc358/final_project/general>.
+
+Instructions for running the automated version of the image: since I’ve
+added my final project image to DockerHub, you can use a docker run that
+references “helenc358/final_project” and run it locally. I’ve added
+docker run commands to rules in my Makefile.
+
+- For Mac users: If you enter “make report/report_mac.html” in the
+  terminal, it will run a container with an empty “report” directory in
+  the project directory that’s mounted to the report folder in the
+  container. The “report” folder will contain the final compiled report
+  in html format.
+
+- For Window users: please enter “make report/report_windows.html” in
+  the terminal.
+
+## Code Description:
 
 `code/make_table.R`
 
