@@ -11,10 +11,10 @@ output/model_coeffs.rds output/model1_summ.rds&: code/model.R data/global_sports
 	Rscript code/model.R
 	
 .PHONY: regression_analysis
-regression_analysis: output/model_coeffs.rds output/model1_summ.rds&
+regression_analysis: output/model_coeffs.rds output/model1_summ.rds
 
 .PHONY: descriptive_analysis
-descriptive_analysis:	output/table_1.rds output/boxplot1.png output/boxplot2.png&
+descriptive_analysis:	output/table_1.rds output/boxplot1.png output/boxplot2.png
 
 .PHONY: clean
 clean:
@@ -23,3 +23,18 @@ clean:
 .PHONY: install
 install:
 	Rscript -e "renv::restore(prompt = FALSE)"
+	
+# Docker associated rules:
+PROJECTFILES = Report.Rmd code/make_table.R code/make_boxplots.R code/model.R code/render_report.R Makefile
+RENVFILES = renv.lock renv/activate.R renv/settings.json
+
+# rule to build image
+project_image: Dockerfile $(PROJECTFILES) $(RENVFILES)
+	docker build -t project_image .
+	touch $@
+	
+# rule to run container
+final_report/report.html:
+	docker run -v "$$(pwd)/final_report":/project/final_report helenc358/final_project
+
+	
