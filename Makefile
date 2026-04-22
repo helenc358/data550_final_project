@@ -25,16 +25,19 @@ install:
 	Rscript -e "renv::restore(prompt = FALSE)"
 	
 # Docker associated rules:
-PROJECTFILES = Report.Rmd code/make_table.R code/make_boxplots.R code/model.R code/render_report.R Makefile
-RENVFILES = renv.lock renv/activate.R renv/settings.json
+#PROJECTFILES = Report.Rmd code/make_table.R code/make_boxplots.R code/model.R code/render_report.R Makefile
+#RENVFILES = renv.lock renv/activate.R renv/settings.json
 
 # rule to build image
-project_image: Dockerfile $(PROJECTFILES) $(RENVFILES)
-	docker build -t project_image .
-	touch $@
+#project_image: Dockerfile $(PROJECTFILES) $(RENVFILES)
+	#docker build -t project_image .
+	#touch $@
 	
-# rule to run container
-final_report/report.html:
-	docker run -v "$$(pwd)/final_report":/project/final_report helenc358/final_project
+# rule to run container on Mac
+report/report_mac.html:
+	docker run -v "$$(pwd)/report":/project/report helenc358/final_project
 
+# rule to run container on Windows
+report/report_windows.html:
+	docker run -v "/$$(pwd)/report":/project/report helenc358/final_project
 	
