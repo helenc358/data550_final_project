@@ -31,9 +31,9 @@ COPY Report.Rmd .
 RUN mkdir code
 RUN mkdir output
 RUN mkdir data
-RUN mkdir final_report
+RUN mkdir report
 COPY data/global_sports_footwear_sales_2018_2026.csv data
 
 COPY code code
-CMD make && cp Report.html final_report/
+CMD make && cp Report.html report/
 
