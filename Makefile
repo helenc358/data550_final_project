@@ -35,9 +35,9 @@ install:
 	
 # rule to run container on Mac
 report/report_mac.html:
-	docker run -v "$$(pwd)/report":/project/report helenc358/final_project
+	docker run -v "$$(pwd)/report":/home/rstudio/project/report helenc358/final_project
 
 # rule to run container on Windows
 report/report_windows.html:
-	docker run -v "/$$(pwd)/report":/project/report helenc358/final_project
+	docker run -v "/$$(pwd)/report":/home/rstudio/project/report helenc358/final_project
 	
